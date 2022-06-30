@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""This is the example module.
+
+This module does stuff.
+"""
+
 import gc
 
 
@@ -20,3 +26,7 @@ def attrs():
     # 不可回收对象列表：又不可达而又无法被释放的对象。
     print(gc.garbage)
 
+
+if __name__ == "__main__":
+    methods()
+    attrs()

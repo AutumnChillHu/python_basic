@@ -1,16 +1,23 @@
-"""common naming examples
+# -*- coding: utf-8 -*-
 
-project_name, package_name, directory_name
-method_name, function_name todo:function & method?
-ClassName, ExceptionName
-GLOBAL_VAR_NAME
-var_name: including function_parameter, instance_var, local_var
+"""this is the python template file
 
-
-todo:
-moudle_name
 """
 
+import sys
 
-if __name__ == "main":
-    print("test")
+def naming():
+    """
+    project_name, package_name, directory_name
+    method_name, function_name todo:function & method?
+    ClassName, ExceptionName
+    GLOBAL_VAR_NAME
+    var_name: including function_parameter, instance_var, local_var
+    todo:moudle_name
+    :return:
+    """
+    pass
+
+
+if __name__ == "__main__":
+    pass
