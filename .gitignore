@@ -1,6 +1,7 @@
 # ignore local test.py
 test.py
 .idea/
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
