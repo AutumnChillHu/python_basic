@@ -1,4 +1,4 @@
-# ignore local test.py
+# local ignore
 test.py
 .DS_Store
 .idea/
