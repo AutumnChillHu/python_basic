@@ -1,34 +1,86 @@
 # -*- coding: utf-8 -*-
+"""leetcode test
 
-def select_sort(arr):
-    for i in range(len(arr) - 1):
-        for j in range(i + 1, len(arr)):
-            if arr[i] > arr[j]:
-                arr[i], arr[j] = arr[j], arr[i]
-    return arr
+https://leetcode.cn/problems/sort-an-array/
+"""
 
 
-def select_sort1(arr):
+def selection_sort(arr):
+    """
+    时间复杂度：O(n^2) = (n-1)+(n-2)+…+1 = ((1+n-1)*(n-1))/2 = n*(n-1)*0.5
+    空间复杂度：S(1)
+    """
     for i in range(len(arr) - 1):
         min_index = i
         for j in range(i + 1, len(arr)):
-            if arr[j] < arr[i]:
+            if arr[j] < arr[min_index]:
                 min_index = j
         arr[i], arr[min_index] = arr[min_index], arr[i]
     return arr
 
 
-def bubble_sort():
-    pass
+def bubble_sort(arr):
+    """
+    时间复杂度：O(n^2) = (n-1)+(n-2)+…+1 = ((1+n-1)*(n-1))/2 = n*(n-1)*0.5
+    空间复杂度：S(1)
+    """
+    for i in range(len(arr) - 1):
+        for j in range(len(arr) - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr
+
+
+def bubble_sort_v1(arr):
+    """没有逆序对时，就已达到有序，即可返回。
+
+    时间复杂度：
+         最好：O(n)
+         最差：O(n^2) = (n-1)+(n-2)+…+1 = ((1+n-1)*(n-1))/2 = n*(n-1)*0.5
+    空间复杂度：S(1)
+    """
+    for i in range(len(arr) - 1):
+        swapped = False
+        for j in range(len(arr) - i - 1):
+            if arr[j] > arr[j + 1]:
+                swapped = True
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+        if not swapped:
+            return arr
+    return arr
+
+
+def bubble_sort_v2(arr):
+    """没有逆序对的局部，即有序，记录位置不再遍历。
+
+    时间复杂度：
+         最好：O(n)
+         最差：O(n^2) = (n-1)+(n-2)+…+1 = ((1+n-1)*(n-1))/2 = n*(n-1)*0.5
+    空间复杂度：S(1)
+    """
+    last_swap = len(arr) - 1
+    for i in range(len(arr) - 1):
+        swapped = False
+        for j in range(last_swap):
+            if arr[j] > arr[j + 1]:
+                swapped = True
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                last_swap = j
+        if -1 == swapped:
+            return arr
+    return arr
 
 
 if __name__ == "__main__":
     arr_list = [
         [],
         [1],
+        [2, 1],
         [5, 2, 3, 1],
-        [12, 34, 100, -10, 345, 49, 68, 0, 2435, 3546, 9, 45, 987, 12, 56, 8, 12, 67, 9, 3, 5]
+        [12, 34, 100, -10, 345, 49, 68, 0, 2435, 3546, 9, 45, 987, 12, 56, 8, 12, 67, 9, 3, 5],
+        [17, 56, 71, 38, 61, 62, 48, 28, 57, 42]
     ]
     for arr in arr_list:
-        print(select_sort(arr))
-    print(arr_list)
+        print(bubble_sort(arr[:]))
+        print(bubble_sort_v1(arr[:]))
+        print(bubble_sort_v2(arr[:]))
