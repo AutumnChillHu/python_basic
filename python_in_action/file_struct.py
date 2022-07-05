@@ -1,22 +1,46 @@
 # -*- coding: utf-8 -*-
 
-"""this is the python template file
+"""this is the template on how the code is organized
 
 """
 
 import sys
 
-def naming():
+
+class Student(object):
     """
-    project_name, package_name, directory_name
-    method_name, function_name todo:function & method?
-    ClassName, ExceptionName
-    GLOBAL_VAR_NAME
-    var_name: including function_parameter, instance_var, local_var
-    todo:moudle_name
-    :return:
+    A Student is an object used to provide students'information.
+
+    Methods:
+
+    update() -- student info
+    graduate() -- return if already gratuated
+
+    Attributes:
+
+    name -- the student's name
+    gender -- felmale or male
     """
-    pass
+
+    def update(self, *args, **kwargs):
+        """ updates student info. """
+        pass
+
+    def graduate(self, name):
+        """ return if already gratuated. """
+        print(name)
+        return True
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __repr__(self, *args, **kwargs):
+        """ Return repr(self). """
+        pass
+
+    name = property(lambda self: object(), lambda self, v: None, lambda self: None)  # default
+
+    gender = property(lambda self: object(), lambda self, v: None, lambda self: None)  # default
 
 
 if __name__ == "__main__":
