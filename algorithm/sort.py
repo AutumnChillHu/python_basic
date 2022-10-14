@@ -139,5 +139,5 @@ if __name__ == "__main__":
     l = [1, 2, 3]
     for arr in arr_list:
         # print(bubble_sort(arr[:]))
-        print(insertion_sort(arr[:]))
+        print(selection_sort(arr[:]))
         # print(insertion_sort1(arr[:]))
