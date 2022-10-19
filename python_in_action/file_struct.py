@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""this is the template on how the code is organized
+"""this is the template about how code is organized
 
 """
 
+# todo:多个import,分组？from import 放哪儿？
 import sys
 
 
