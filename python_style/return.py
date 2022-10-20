@@ -7,7 +7,7 @@
 
 def no_return():
     """函数中完全没有return语句
-    但是个人认为，最好是return True/False 0/1 None，最好是给一个输出。
+    但是个人认为，最好是显示返回return None True/False 0/1，最好是给一个输出。
     """
     pass
 

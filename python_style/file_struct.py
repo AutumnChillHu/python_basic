@@ -23,17 +23,20 @@ class Student(object):
     gender -- felmale or male
     """
 
+    def __init__(self, *args, **kwargs):
+        pass
+
+
     def update(self, *args, **kwargs):
         """ updates student info. """
         pass
 
     def graduate(self, name):
-        """ return if already gratuated. """
+        """ return if already gratuated.
+        these doc can be viewd by graduate.__doc__"""
+
         print(name)
         return True
-
-    def __init__(self, *args, **kwargs):
-        pass
 
     def __repr__(self, *args, **kwargs):
         """ Return repr(self). """
