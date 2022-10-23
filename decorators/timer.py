@@ -2,14 +2,14 @@
 from functools import wraps
 
 
-def swapper(func):
-    print("init temp")
+def dontknow(func):
+    print("init temp",func.__name__)
 
     @wraps(func)
-    def temp(*arg, **kwargs):
-        print(temp.__name__)
+    def wrapper(*arg, **kwargs):
+        print("ss")
 
-    return temp
+    return wrapper
 
 
 if __name__ == "__main__":
