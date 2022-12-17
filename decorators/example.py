@@ -1,67 +1,128 @@
 # -*- coding: utf-8 -*-
-
-"""
-带参数的装饰器：需要再包一层
-
 from functools import wraps
 
-def log_with_param(text):
-    def decorator(func):
+
+def without_params(func):
+    """基于函数实现不带参数的装饰器"""
+    # 传递函数层
+    print("@{}装饰器的外部函数只为{}()函数启动一次".format(without_params.__name__, func.__name__))
+
+    @wraps(func)
+    def wrapper(*arg, **kwargs):
+        # 装饰器具体实现层
+        print("@{}装饰器的内部函数被{}()函数调用".format(without_params.__name__, func.__name__))
+
+    print("@{}装饰器的外部函数只为{}()函数启动一次完毕".format(without_params.__name__, func.__name__))
+
+    return wrapper
+
+
+def with_params(li, text="hello"):
+    """基于函数实现带参数的装饰器"""
+    # 传递参数层
+    print("@{}装饰器的最外部函数启动一次".format(with_params.__name__))
+
+    def pass_func(func):
+        # 传递函数层
+        print("@{}装饰器的传递函数层函数只为{}()函数启动一次".format(with_params.__name__, func.__name__))
+
         @wraps(func)
         def wrapper(*args, **kwargs):
-            print('call %s():' % func.__name__)
-            print('args = {}, kwargs = {}'.format(args, kwargs))
-            print('log_param = {}'.format(text))
+            """装饰器具体实现层"""
+            print("@{}装饰器的内部函数被{}()函数调用".format(with_params.__name__, func.__name__))
+            print('args:{}, kwargs:{}'.format(args, kwargs))
+            print('params:{}, {}'.format(text, li))
             return func(*args, **kwargs)
+
         return wrapper
-    return decorator
 
-@log_with_param("param")
-def test_with_param(p):
-    print(test_with_param.__name__)
-//调用
-test_with_param(p="hxj")
-//结果
-call test_with_param()
-args = (), kwargs = {'p': 'hxj'}
-log_param = param
-test_with_param
-"""
+    return pass_func
 
-"""
-通过类实现装饰器
 
-class Decrator():
+# @with_params([1, 2, 3])
+# def func1(name):
+#     name += "MO"
+#     return None
+#
+#
+# @with_params(li=[1, 2, 3])
+# def func2(name):
+#     name += "MO"
+#     return None
+#
+#
+# @with_params(li=[1, 2, 3], text="hello world", )
+# def func3(name):
+#     name += "MO"
+#     return None
+#
+#
+# func1("hxj")
+# func2("hxj")
+# func3("hxj")
+
+
+class WithoutParams():
+    """基于类实现的不带参数的装饰器"""
+
     def __init__(self, func):
+        """__init__()等同于装饰器的外部函数
+
+        func: 传递函数，必须有。代表传递函数层。
+        """
+
+        print("@{}装饰器的外部函数只为{}()函数启动一次".format(WithoutParams.__name__, func.__name__))
         self._func = func
 
-    //class decorator执行装饰器就是执行__call__函数
     def __call__(self, *args, **kwargs):
-        print('class decorator start')
-        print(self._func.__name__)  # 原函数
-        self.more_func()
-        self._func(*args, **kwargs)  # 原函数
-        print('class decorator ending')
+        """__call__()中定义装饰器"""
 
-    def more_func(self):
+        # 装饰器功能定义
+        # 不需要@wraps(func)，因为基于类实现的装饰器没有嵌套函数。
+        print("@{}装饰器的内部函数被{}()函数调用".format(self.__class__, self._func.__name__))
+        print("args:{}, kwargs:{}".format(args, kwargs))
+        self.extra_func()
+
+        # 调用被修饰函数。
+        self._func(*args, **kwargs)
+        return None
+
+    def extra_func(self):
         print("增加功能")
 
-@Decrator
-def func_name(name, age):
-    print("执行函数", name, age)
 
-func_name("huxiajie", 23)
+class WithParams(object):
+    """基于类实现的带参数的装饰器"""
 
-//结果
-class decorator start
-func_name
-增加功能
-执行函数 hxj 23
-class decorator ending
+    def __init__(self, msg, level='INFO'):
+        # 参数传递层
+        self.msg = msg
+        self.level = level
 
-不再需要@wraps(func)，因为没有嵌套函数
-"""
+    def __call__(self, func):
+        print("@{}装饰器的外部函数只为{}()函数启动一次".format(self.__class__, func.__name__))
+
+        def wrapper(*args, **kwargs):
+            print("@{}装饰器的内部函数被{}()函数调用".format(self.__class__, func.__name__))
+            print("args:{}, kwargs:{}".format(args, kwargs))
+            self.extra_func()
+            func(*args, **kwargs)
+
+        return wrapper
+
+    def extra_func(self):
+        print("增加功能")
 
 
-if __name__ == "__main__":
-    pass
+@WithoutParams
+def func4(text, age):
+    print("执行函数:", text, age)
+
+
+@WithParams(msg="hello")
+def func5(text, age):
+    print("执行函数:", text, age)
+
+
+func4("huxiajie", 18)
+func5("huxiajie", 18)
