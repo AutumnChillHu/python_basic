@@ -8,9 +8,27 @@ def without_params(func):
     print("@{}装饰器的外部函数只为{}()函数启动一次".format(without_params.__name__, func.__name__))
 
     @wraps(func)
-    def wrapper(*arg, **kwargs):
+    def wrapper(*args, **kwargs):
         # 装饰器具体实现层
         print("@{}装饰器的内部函数被{}()函数调用".format(without_params.__name__, func.__name__))
+        return func(*args, **kwargs)
+
+    print("@{}装饰器的外部函数只为{}()函数启动一次完毕".format(without_params.__name__, func.__name__))
+
+    return wrapper
+
+
+def without_params_noreturn(func):
+    """基于函数实现不带参数的装饰器"""
+    # 传递函数层
+    print("@{}装饰器的外部函数只为{}()函数启动一次".format(without_params.__name__, func.__name__))
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # 装饰器具体实现层
+        result = func(*args, **kwargs)  # 直接执行了
+        print("@{}装饰器的内部函数被{}()函数调用".format(without_params.__name__, func.__name__))
+        return result
 
     print("@{}装饰器的外部函数只为{}()函数启动一次完毕".format(without_params.__name__, func.__name__))
 
@@ -20,22 +38,24 @@ def without_params(func):
 def with_params(li, text="hello"):
     """基于函数实现带参数的装饰器"""
     # 传递参数层
-    print("@{}装饰器的最外部函数启动一次".format(with_params.__name__))
+    print("@{}装饰器的 最外部函数 启动一次".format(with_params.__name__))
 
     def pass_func(func):
         # 传递函数层
-        print("@{}装饰器的传递函数层函数只为{}()函数启动一次".format(with_params.__name__, func.__name__))
+        print("@{}装饰器的 传递函数层函数 只为{}()函数启动一次".format(with_params.__name__, func.__name__))
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             """装饰器具体实现层"""
-            print("@{}装饰器的内部函数被{}()函数调用".format(with_params.__name__, func.__name__))
+            print("@{}装饰器的 内部函数 被{}()函数调用".format(with_params.__name__, func.__name__))
             print('args:{}, kwargs:{}'.format(args, kwargs))
             print('params:{}, {}'.format(text, li))
             return func(*args, **kwargs)
 
+        print("@{}装饰器的 传递函数层函数 只为{}()函数启动一次完毕".format(with_params.__name__, func.__name__))
         return wrapper
 
+    print("@{}装饰器的最外部函数启动一次完毕".format(with_params.__name__))
     return pass_func
 
 
@@ -113,16 +133,14 @@ class WithParams(object):
     def extra_func(self):
         print("增加功能")
 
-
-@WithoutParams
-def func4(text, age):
-    print("执行函数:", text, age)
-
-
-@WithParams(msg="hello")
-def func5(text, age):
-    print("执行函数:", text, age)
-
-
-func4("huxiajie", 18)
-func5("huxiajie", 18)
+# @WithoutParams
+# def func4(text, age):
+#     print("执行函数:", text, age)
+#
+#
+# @WithParams(msg="hello")
+# def func5(text, age):
+#     print("执行函数:", text, age)
+#
+# func4("huxiajie", 18)
+# func5("huxiajie", 18)
