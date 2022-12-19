@@ -19,7 +19,6 @@ class Employee(object):
             self.__salary = 20000
         else:
             self.__salary += increment
-        return self.__salary
 
     @salary.deleter
     def salary(self):
