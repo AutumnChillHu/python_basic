@@ -5,7 +5,7 @@ deque模块科普：https://janineee.atlassian.net/wiki/spaces/JW/pages/67633157
 """
 
 from collections import deque
-from linkedlist_mo import Node
+from linkedlistMO import Node
 
 
 class StackMo():
