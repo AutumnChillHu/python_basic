@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
 """
-实现多进程的三种方式：
-1. multiprocessing.Process类
-2. 继承multiprocessing.Process类
-3. 进程池multiprocessing.Pool类
+实现多进程的3种方式：
+    1. multiprocessing.Process类
+    2. 继承multiprocessing.Process类
+    3. 进程池multiprocessing.Pool类
 
-进程间通信的三种方式:
-1.multiprocessing.Queue类：共享数据队列，进程安全。
-2.multiprocessing.Pipe类：共享数据管道，进程不安全需要加锁。
-3.multiprocessing.Value/Array/Manager：共享内存，进程不安全需要加锁。
-4.信号量：传递multiprocessing.Semaphore，同时允许一定数量的线程更改数据
+进程间通信的3种方式:
+    1.multiprocessing.Queue类：共享数据队列，进程安全。
+    2.multiprocessing.Pipe类：共享数据管道，进程不安全需要加锁。
+    3.multiprocessing.Value/Array/Manager：共享内存，进程不安全需要加锁。
+    4.信号量：传递multiprocessing.Semaphore，同时允许一定数量的线程更改数据
 """
 
 import os
