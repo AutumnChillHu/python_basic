@@ -4,8 +4,9 @@
     1.threading.Thread类
     2.继承threading.Thread类
 
-多线程安全上锁的2种方式:
-    1.
+多线程安全 上锁的2种方式:
+    1.Lock
+    2.RLock
 """
 
 """实现多线程-方式1：threading.Thread类"""
@@ -52,26 +53,25 @@ def new_mythreading():
         threading_list[i].start()
 
 
-"""线程安全："""
+"""线程安全-上锁-方式1：Lock"""
+from threading import Lock
 
-# Lock
+num_lock = 0
+# 全局锁
+mutex_lock = Lock()
 
-from threading import Thread, Lock
 
-num = 0
-mutex = Lock()  # 全局锁
-
-# class MyThread(Thread):
-#     def run(self):
-#         global num
-#         time.sleep(1)
-#         if mutex.acquire():
-#             num += 1
-#             time.sleep(0.5)
-#             num += 1
-#             msg = self.name + ': num value is ' + str(num)
-#             print(msg)
-#             mutex.release()
+class MyLockThread(Thread):
+    def run(self):
+        global num_lock
+        time.sleep(1)
+        if mutex_lock.acquire():
+            num_lock += 1
+            time.sleep(0.5)
+            num_lock += 1
+            msg = self.name + ': num value is ' + str(num_lock)
+            print(msg)
+            mutex_lock.release()
 
 
 # if __name__ == '__main__':
@@ -86,10 +86,10 @@ mutex = Lock()  # 全局锁
 # 都被
 # release，其他的线程才能获得资源。
 
-from threading import Thread, RLock
-
-num = 0
-mutex = RLock()
+# from threading import RLock
+#
+# num = 0
+# mutex = RLock()
 
 # class MyThread(Thread):
 #     def run(self):
@@ -109,8 +109,13 @@ mutex = RLock()
 #     for i in range(5):
 #         MyThread().start()
 
+def return_test():
+    print("hi")
+
 if __name__ == "__main__":
     # 实现多线程-方式1：threading.Thread类
     # new_threading()
     # 实现多线程-方式2：继承threading.Thread类
     new_mythreading()
+    x=return_test()
+    print(x)

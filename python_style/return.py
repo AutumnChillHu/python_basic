@@ -6,8 +6,8 @@
 
 
 def no_return():
-    """函数中完全没有return语句
-    但是个人认为，最好是显示返回return None True/False 0/1，最好是给一个输出。
+    """函数中完全没有return语句，就不用写。
+    显示获取没有return语句的函数返回值时，为None。
     """
     pass
 

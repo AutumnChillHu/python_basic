@@ -10,19 +10,23 @@ def has_dict():
     # dict是否包含key
     if "name" in d:
         print("in dict")
+        return True
 
     # if "name" in d.keys():
     #     print("in dict.keys()")
+    #     return True
 
     # dict是否包含value
     if "mo" in d.values():
         print("in dict.values()")
+        return True
 
     # dict是否包含key-value
     if ("name", "mo") in d.items():
         print("in d.items()")
+        return True
 
-    return None
+    return False
 
 
 def traversal_dict():
@@ -47,8 +51,6 @@ def traversal_dict():
     for i in d.values():
         print(i)
 
-    return None
-
 
 def delete_dict():
     """删除字典元素"""
@@ -62,9 +64,6 @@ def delete_dict():
     print(d.popitem())
     # 空字典：KeyError: dictionary is empty'
     # print(dict().popitem())
-
-    return None
-
 
 if __name__ == "__main__":
     d = {"name": "mo", "age": 25, "gender": "female"}

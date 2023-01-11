@@ -10,7 +10,6 @@ def timer():
 
     # 按秒输出
     print("程序执行时间为", time_end - time_start, "秒")
-    return None
 
 
 if __name__ == "__main__":

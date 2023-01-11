@@ -25,7 +25,6 @@ def process_run(num):
     print("process_run 进程开始{}>>> pid={}".format(num, os.getpid()))
     time.sleep(5)
     print("process_run 进程结束{}>>> pid={}".format(num, os.getpid()))
-    return None
 
 
 def new_multiprocess():
