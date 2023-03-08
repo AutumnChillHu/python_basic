@@ -6,160 +6,121 @@
     2. 继承multiprocessing.Process类
     3. 进程池multiprocessing.Pool类
 
--进程间无法通信举例
-
 -进程间通信IPC的3种方式:
-    1.multiprocessing.Queue类：共享队列，进程安全。
-    2.multiprocessing.Pipe类：共享管道，进程不安全。
-    3.multiprocessing.Manager：共享内存，进程安全。
-      multiprocessing.Value/Array：共享内存，进程不安全。
-    4.信号量：传递multiprocessing.Semaphore，同时允许一定数量的线程更改数据
+    1.multiprocessing.Queue类：队列，进程安全。
+    2.multiprocessing.Pipe类：管道，进程不安全。
+    3.multiprocessing.Value：共享内存，进程安全。
+      multiprocessing.Array：共享内存，进程安全。
+    4.multiprocessing.Manager：服务进程管理共享状态。
 """
 
 import os
 import time
+
+
+def run(num):
+    print("进程开始run{}>>> pid={}, ppid={}".format(num, os.getpid(), os.getppid()))
+    time.sleep(4)
+    print("进程结束run{}>>> pid={}, ppid={}".format(num, os.getpid(), os.getppid()))
+    return os.getpid()
+
 
 """实现多进程-方式1：multiprocessing.Process类"""
 from multiprocessing import Process
 
 
 def new_multiprocess():
-    processes = []
-    for i in range(5):
-        # 初始化进程：Process(target=func_name, args=(i,))
-        # target：调用对象，绑定启动进程时需要执行的方法。相当于绑定run()方法。
-        # args：传递target的参数，以元组形式传递。
-        processes.append(Process(target=process_run, args=(i,)))
+    for i in range(50):
+        # Process(target=func_name, args=(i,))：初始化一个进程
+        #   -target：调用对象，绑定启动进程时需要执行的方法。相当于绑定run()方法。
+        #   -args：传递target的参数，以元组形式传递。
+        p = Process(target=run, args=(i,))
 
-    for p in processes:
-        # 异步启动进程，start()方法触发执行target所绑定的方法。
+        # start()：异步启动进程，触发执行target绑定的方法。
         p.start()
 
-    # terminate()终止进程：立即中断进程，并结束。
-    # 所以processes[0]没有打印语句
-    processes[0].terminate()
-    # join()终止进程：等待进执行完毕后，再结束。
-    # 所以processes[1]会有打印语句
-    processes[1].join()
+        # 下方介绍几种进程结束方法
+        if i == 3:
+            # join([time])：阻塞主进程，直至p进程执行完毕。
+            #   -time：最长阻塞时间。
+            p.join()
+        if i == 6:
+            # terminate()：立即中断p进程，后续语句以及finally语句都不会执行。
+            p.terminate()
+        if i == 9:
+            # kill()：与terminate()相同。只是kill()在Unix上使用SIGKILL信号实现，terminate()在Unix上使用SIGTERM信号实现。
+            p.kill()
 
-    # 判断进程是否存活
-    print(processes[0].is_alive())
-    print(processes[1].is_alive())
-    print(processes[4].is_alive())
-
-    time.sleep(10)
-    print(processes[4].is_alive())
-
-
-def process_run(num):
-    # 打印当前进程id
-    print("进程开始run{}>>> pid={}, ppid={}".format(num, os.getpid(), os.getppid()))
-    time.sleep(4)
-    print("进程结束run{}>>> pid={}, ppid={}".format(num, os.getpid(), os.getppid()))
+        # 下方介绍几种进程常用方法
+        if i == 2:
+            # is_alive()：返回True/False进程是否活着
+            print(p.is_alive())
 
 
 """实现多进程-方式2：继承multiprocessing.Process类"""
 
 
 class MyMultiProcess(Process):
-    def __init__(self):
+    def __init__(self, num):
         super().__init__()
+        self.num = num
 
     def run(self):
-        print("进程开始run>>> pid={}".format(os.getpid()))
-        time.sleep(5)
-        print("进程结束run>>> pid={}".format(os.getpid()))
-
-
-def new_mymultiprocess():
-    processes = []
-
-    for i in range(3):
-        processes.append(MyMultiProcess())
-
-    for p in processes:
-        # 异步启动进程，start()触发执行run()方法。
-        p.start()
+        print("进程开始run{}>>> pid={}, ppid={}".format(self.num, os.getpid(), os.getppid()))
+        time.sleep(4)
+        print("进程结束run{}>>> pid={}, ppid={}".format(self.num, os.getpid(), os.getppid()))
+        return os.getpid()
 
 
 """实现多进程-方式3：进程池multiprocessing.Pool模块"""
 from multiprocessing import Pool
 
 
-def multiprocesspool():
-    # 初始化进程池，提供池内进程数。
+def new_multiprocesspool():
+    # Pool(num)：初始化进程池，num指定池内进程数容量。默认为os.cpu_count()。
     pool = Pool(5)
-    results = []
-    for i in range(20):
-        # 异步启动多进程。
-        # 遇到进程池已满的情况，则会等待直至池中有进程结束，让出空位。
-        result = pool.apply_async(processpool_run, args=(i,))
-        # pool.apply(fun, args=(i,))：同步启动多进程，相当于单进程，别用。
-        results.append(result)
 
-    # pool.terminate()：中止并关闭pool。停止接受新进程，立即中断进程，并结束。
-    # pool.close()：    关闭pool。停止接收新任务，等待进程执行完毕后结束。等待过程并不影响主进程的继续执行。
-    # pool.join()：     阻塞主进程，等待所有子进程执行完毕。必须在close或terminate()之后使用。
-    # 单独使用close()或terminate()方法，可能会导致：主进程已经结束，但是子进程还未结束的情况。
-    # 与join()方法组合使用，可以避免此问题。
+    # 下方介绍启动pool的方式
+    # pool.apply(fun, args=(i,))：同步启动一个进程，相当于单进程，别用。
+    # pool.apply_async(fun, args=(i,))：启动一个进程。遇到进程池已满的情况，则会等到池中有进程结束，让出空位。
+    # 通过列表推导式起10个进程。
+    results = [pool.apply_async(run, (i,)) for i in range(10)]
+    # apply_async()返回ApplyResult对象，通过get方法获取进程执行结果。
+    print([res.get(timeout=1) for res in results])
+
+    # 下方介绍结束pool的方式
+    # 前提说明：pool拥有需要管理的内部资源，需要正确释放。
+    #         1)要么主动调用 close()/terminate() + join()语句释放资源；
+    #         2)要么用with-as语句释放资源。
+
+    # 1) 主动调用 close()/terminate() + join()语句释放资源；
+    # pool.terminate()：立即关闭进程池，立即中断进程任务的执行。
+    # pool.close()：进程池停止接收新任务，当所有任务执行完毕后，进程池才会关闭。执行任务过程并不会阻塞主进程。
+    # 单独使用close()/terminate()可能导致问题：主进程已经结束，但是子进程还未结束。
+    # 解决方案：与join()方法组合使用，可以避免此问题。
+    # pool.join()：阻塞主进程，直至进程池关闭。必须在close或terminate()之后使用。
     pool.close()
     pool.join()
 
-    for i in range(len(results)):
-        # results[i]为ApplyResult对象，通过get方法获取进程执行结果。
-        results[i] = results[i].get()
-    return results
+    # 2)用with-as语句释放资源。
+    with Pool(10) as pool:
+        results = [pool.apply_async(run, (i,)) for i in range(10)]
+        print([res.get() for res in results])
 
 
-def processpool_run(num):
-    print("进程开始run>>> num={}, pid={}, ppid={}".format(num, os.getpid(), os.getppid()))
-    time.sleep(3)
-    print("进程结束run>>> num={}, pid={}, ppid={}".format(num, os.getpid(), os.getppid()))
-    return num
-
-
-"""进程间无法通信举例"""
-GLOBAL_VAR = ["a", "b", [1, 2]]
-
-
-def father_process():
-    li = ["a", "b", [1, 2]]
-    s = "hello"
-    p1 = Process(target=p_run, args=(li, s))
-    p2 = Process(target=p_run, args=(li, s))
-    print("li:{}, s:{}, GLOBAL_VAR:{}".format(li, s, GLOBAL_VAR))
-
-
-def p_run(li, s):
-    #
-    li.append(os.getpid())
-    li[2].append(os.getpid())
-    s += os.getpid()
-    # 父进程相同的
-    GLOBAL_VAR.append(str(os.getpid()))
-    GLOBAL_VAR.append(str(os.getpid()))
-
-
-"""进程间通信-方式1：multiprocessing.Queue类
-1. 队列 FIFO，一端可读，一端可写。
-2. 进程安全：底层队列使用管道和锁定实现。
-"""
+"""进程间通信-方式1：multiprocessing.Queue类"""
 from multiprocessing import Queue
 
 
-def write_queue(q, value_list):
-    for v in value_list:
-        print("写进程{}写入数据：{}，父进程{}".format(os.getpid(), v, os.getppid()))
-        # queue.put(item [,block] [,timeout] )：添加item。
-        #   -block：队列满时，是否阻塞等待至有空位。默认为True。若为False，不阻塞，抛出Queue.Full异常。
-        #   -timeout：阻塞模式中，指定最大等待时间。超时将抛出Queue.Full异常。
-        q.put(v)
-        time.sleep(1)
+def iPC_by_queue():
+    q = Queue()
 
+    p_write = Process(target=write_queue, args=(q, [1, 2, 3, True, "hello", "world", "END", 999, 998]))
+    p_write.start()
 
-def read_queue(q):
+    # 获取队列元素
     while True:
-        # queue.get([,block] [,timeout])：获取并删除元素。
+        # queue.get([,block] [,timeout])：获取并删除一个元素。
         #   -block：队列空时，是否阻塞等待至有元素。默认为True。若为False，不阻塞，抛出Queue.Empty异常。
         #   -timeout：阻塞模式中，指定最大等待时间。超时后仍没有新增项，抛出Queue.Empty异常。
         item = q.get()
@@ -169,135 +130,121 @@ def read_queue(q):
         if item == "END":
             break
 
-
-def iPC_by_queue():
-    q = Queue()
-
-    p_write = Process(target=write_queue, args=(q, [1, 2, 3, True, "hello", "world", "END", 999]))
-    p_read = Process(target=read_queue, args=(q,))
-
-    # 异步启动进程
-    p_write.start()
-    # p_read.start()
-
-    # 终止进程
     p_write.join()
-    # p_read.join()
 
-    while True:
-        # queue.get([,block] [,timeout])：获取并删除元素。
-        #   -block：队列空时，是否阻塞等待至有元素。默认为True。若为False，不阻塞，抛出Queue.Empty异常。
-        #   -timeout：阻塞模式中，指定最大等待时间。超时后仍没有新增项，抛出Queue.Empty异常。
-        item = q.get()
-        print("读进程{}读取数据：{}，父进程{}".format(os.getpid(), item, os.getppid()))
+    # 死锁错误场景：请确保队列中的元素都被消费完成后再结束写进程。
+    # 否则，先join写进程，再试图去get元素可能会导致死锁。
+    q.get()
 
-        # 约定结束规则。
-        if item is True:
-            break
-
-    p_read.start()
-    p_read.join()
+    # 下方介绍几种queue常用方法
+    q.empty()
+    q.full()
 
 
-"""进程间通信-方式2：multiprocessing.Pipe
-1. 管道 FIFO，默认双工向，返回两个连接对象，代表管道的两端。
-2. 每个连接对象都有send()和recv()，双端都允许写入和读取。
-   left写入的，只有right能读；
-   right写入的，只有left能读。
-3. 进程不安全。
-"""
+def write_queue(q, value_list):
+    for v in value_list:
+        print("写进程{}写入数据：{}，父进程{}".format(os.getpid(), v, os.getppid()))
+        # queue.put(item [,block] [,timeout] )：添加item。
+        #   -block：队列满时，是否阻塞等待至有空位。默认为True。若为False，不阻塞，抛出Queue.Full异常。
+        #   -timeout：阻塞模式中，指定最大等待时间。超时将抛出Queue.Full异常。
+        q.put(v)
+
+
+"""进程间通信-方式2：multiprocessing.Pipe"""
 from multiprocessing import Pipe
 
 
-def write_pipe(p, value_list):
-    for v in value_list:
-        print("写进程{}写入数据：{}，父进程{}".format(os.getpid(), v, os.getppid()))
-        p.send(v)
-        time.sleep(1)
+def iPC_by_pipe():
+    # Pipe(): 初始化，返回两个连接对象，代表管道的两端。
+    #   -每个连接对象都有send()和recv()，双端都允许写入和读取，即默认是双工的。
+    #   -left写入的，只有right能读；right写入的，只有left能读。
+    left_conn, right_conn = Pipe()
+    process_write = Process(target=write_pipe, args=(left_conn, [1, 2, 3, True, "hello", "world", "END", 999, 998]))
+    process_write.start()
 
-
-def read_pipe(p):
     while True:
-        item = p.recv()
+        item = right_conn.recv()
         print("读进程{}读取数据：{}，父进程{}".format(os.getpid(), item, os.getppid()))
 
+        # 约定结束规则。
+        if item == "END":
+            break
 
-def iPC_by_pipe():
-    p_left, p_right = Pipe()
-    process_write1 = Process(target=write_pipe, args=(p_left, [1, 2, 3]))
-    process_write2 = Process(target=write_pipe, args=(p_right, ["a", "b", "c"]))
-    process_read1 = Process(target=read_pipe, args=(p_left,))
-    process_read2 = Process(target=read_pipe, args=(p_right,))
-
-    process_write1.start()
-    process_write2.start()
-    process_read1.start()
-    process_read2.start()
-
-    process_write1.join()
-    process_write2.join()
-    process_read1.join()
-    process_read2.join()
+    process_write.join()
 
 
-"""进程间通信-方式3：multiprocessing.Manager
-1. Manager进程安全。
-"""
+def write_pipe(conn, value_list):
+    for v in value_list:
+        print("写进程{}写入数据：{}，父进程{}".format(os.getpid(), v, os.getppid()))
+        conn.send(v)
 
-"""Value/Array/
-1. multiprocessing.Manager：共享内存，进程安全。
-      multiprocessing.Value/Array：共享内存，进程不安全，需要加锁。
-"""
 
-# 如果多个进程不是源于同一个父进程，只能用共享内存，信号量等方式。
-# 使用到线程池的时候，会涉及到主进程和父进程之间的通信，需要使用Manager。
-#
-# 共享原理：在内中开辟一块空间，进程可以写入内容和读取内容完成通信，但是每次写入内容会覆盖之前内容。内存共享是不安全的。不推荐。
-#
-# Manager：对于复杂的数据结构，Manager是一种较为高级的多进程通信方式，它能支持Python支持的任何数据结构（list
-# dict
-# queue
-# string等等）。manager据说是加锁了的，是安全的。        原理是先启动一个ManagerServer进程，这个进程是阻塞的，它监听一个socket。                然后其他进程ManagerClient，通过socket来连接到ManagerServer，实现通信。
+"""进程间通信-方式3：multiprocessing.Value Array"""
+from multiprocessing import Value, Array
 
+
+def iPC_by_value_and_array():
+    double = Value('d', 1.23)  # double
+    int = Value('i', 1)  # int
+    char = Value('u', "a")  # unicode字符, one character
+    arr_int = Array('i', range(10))
+    arr_char = Array('u', ['a', 'b', 'c', 'd', 'e'])
+
+    p = Process(target=run_ipc_by_value_and_array, args=(double, int, char, arr_int, arr_char))
+    p.start()
+    p.join()
+    print(double.value, int.value, char.value, arr_int[:], arr_char[:])
+
+
+def run_ipc_by_value_and_array(double, int, char, arr_int, arr_char):
+    double.value += 1
+    int.value += 1
+    char.value = "z"
+    # arr_int.value.append(999)
+    arr_char[0] = "z"
+
+
+"""进程间通信-方式4：multiprocessing.Manager"""
 from multiprocessing import Manager
 
 
-def func(ma_dic, dic, ma_li, li):
-    ma_dic[os.getpid()] = os.getpid()
-    dic[os.getpid()] = os.getpid()
-    ma_li.append(os.getpid())
+def iPC_by_manager():
+    with Manager() as manager:
+        dic = manager.dict()
+        li = manager.list([1, 2, "a", "xyz"])
+        double = manager.Value('d', 1.23)
+        int = manager.Value('i', 1)
+        char = manager.Value('u', "a")
+
+        p = Process(target=run_ipc_by_manager, args=(dic, li, double, int, char))
+        p.start()
+        p.join()
+
+        print(dic, li, double.value, int.value, char.value)
+
+
+def run_ipc_by_manager(dic, li, double, int, char):
+    dic[1] = os.getpid()
     li.append(os.getpid())
+    li[0] += 100
+    double.value += 1
+    int.value += 1
+    char.value = 'z'
 
-
-# if __name__ == '__main__':
-#     manager = Manager()
-#     ma_dic = manager.dict()  # manager中的字典结构
-#     ma_li = manager.list()  # manager中的列表结构
-#     dic = {}  # 普通字典
-#     li = []  # 普通列表
-#
-#     processes = []
-#     for i in range(5):
-#         processes.append(Process(target=func, args=(ma_dic, dic, ma_li, li)))
-#         processes[i].start()
-#     for p in processes:
-#         p.join()
-#
-#     print("manager.dict：", ma_dic)
-#     print("dict：", dic)
-#     print("manager.list：", ma_li)
-#     print("list：", li)
-# // 输出
-# manager.dict： {74427: 74427, 74429: 74429, 74430: 74430, 74428: 74428, 74426: 74426}
-# dict： {}
-# manager.list： [74427, 74429, 74430, 74428, 74426]
-# list： []
 
 if __name__ == '__main__':
+    # 实现多进程
     # new_multiprocess()
-    # new_mymultiprocess()
-    # multiprocesspool()
+    # new_multiprocesspool()
 
-    iPC_by_queue()
+    # 进程间通信IPC
+    # iPC_by_queue()
     # iPC_by_pipe()
+    # iPC_by_value_and_array()
+    # iPC_by_manager()
+
     pass
+    time.sleep(10)
+    print(queue.get())
+
+    print("end")
