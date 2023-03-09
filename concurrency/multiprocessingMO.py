@@ -244,7 +244,3 @@ if __name__ == '__main__':
     # iPC_by_manager()
 
     pass
-    time.sleep(10)
-    print(queue.get())
-
-    print("end")
