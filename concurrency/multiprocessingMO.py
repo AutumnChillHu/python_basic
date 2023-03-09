@@ -102,7 +102,7 @@ def new_multiprocesspool():
     pool.close()
     pool.join()
 
-    # 2)用with-as语句释放资源。
+    # 2)用with-as语句释放资源：退出语句块时 close()+join() 会被调用。
     with Pool(10) as pool:
         results = [pool.apply_async(run, (i,)) for i in range(10)]
         print([res.get() for res in results])
