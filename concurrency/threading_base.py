@@ -7,10 +7,6 @@
 -线程的2种锁：
     1.Lock类
     2.RLock类
-
--多线程与单线程提效对比：
-    1.斐波那契数列
-    2。阶乘与累加函数
 """
 
 import threading
@@ -23,6 +19,7 @@ def run_task1():
     time.sleep(2)
     print(
         "线程结束run>>> fun_name={} thread_name={}".format(run_task1.__name__, threading.current_thread().name))
+
 
 
 def run_task2():
