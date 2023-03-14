@@ -11,7 +11,7 @@
 import threading
 import time
 
-from concurrency.examples.sortlocks import acquire
+from concurrency.tool_sortlocks import acquire
 
 
 def run_task1():
