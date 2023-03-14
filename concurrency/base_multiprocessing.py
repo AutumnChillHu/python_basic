@@ -180,7 +180,6 @@ def iPC_by_value_and_array():
     p.start()
     p.join()
     print(double.value, int.value, char.value, arr_int[:], arr_char[:])
-    print(double., int.value, char.value, arr_int[:], arr_char[:])
 
 
 def run_ipc_by_value_and_array(double, int, char, arr_int, arr_char):
