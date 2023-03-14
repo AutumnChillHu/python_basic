@@ -8,9 +8,10 @@
     1.Lock类
     2.RLock类
 """
-
 import threading
 import time
+
+from concurrency.examples.sortlocks import acquire
 
 
 def run_task1():
@@ -19,7 +20,6 @@ def run_task1():
     time.sleep(2)
     print(
         "线程结束run>>> fun_name={} thread_name={}".format(run_task1.__name__, threading.current_thread().name))
-
 
 
 def run_task2():
@@ -217,13 +217,14 @@ def run_rlock_by_finally(li, rlock):
     print()
 
 
-"""死锁-场景1：因程序设计，导致某些情况下没有执行释放锁的语句，导致其他线程无法再使用资源。try——finally/with"""
+"""死锁-场景1：为
+因程序设计，导致某些情况下没有执行释放锁的语句，导致其他线程无法再使用资源。try——finally/with"""
 
 deadlock_unreleased = Lock()
 deadlock_unreleased_list = [1, 2, 3]
 
 
-def new_deadlock_unreleased(index):
+def deadlock_unreleased(index):
     deadlock_unreleased.acquire()
     if index >= len(deadlock_unreleased_list) or index < 0:
         print("wrong index")
@@ -232,8 +233,33 @@ def new_deadlock_unreleased(index):
     deadlock_unreleased.release()
     return True
 
-"""死锁：常见原因尝试获取了多个锁"""
 
+"""死锁-场景2：一个线程中尝试获取多个lock
+经典问题：哲学家就餐问题
+"""
+
+
+def philosopher():
+    people = 5
+    chopsticks_locks = [threading.Lock() for i in range(people)]
+    for i in range(people):
+        Thread(target=eat, args=(chopsticks_locks[i], chopsticks_locks[(i + 1) % people])).start()
+
+
+def eat(left_stick, right_stick):
+    while True:
+        print("{} applying".format(threading.current_thread().name))
+        # with left_stick:
+        #     with right_stick:
+        #         print("{} eating".format(threading.current_thread().name))
+        #         time.sleep(3)
+        with acquire(left_stick, right_stick):
+            print("{} eating".format(threading.current_thread().name))
+            time.sleep(3)
+
+
+# 创建一个线程本地数据
+_local = threading.local()
 
 if __name__ == "__main__":
     # 主线程
@@ -244,8 +270,8 @@ if __name__ == "__main__":
 
     # 线程锁
     # lock_by_finally()
-    lock_by_with()
+    # lock_by_with()
     # rlock_threading()
 
-    # 死锁举例
-    # new_death_lock()
+    # 死锁
+    philosopher()
