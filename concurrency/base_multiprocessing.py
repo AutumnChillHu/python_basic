@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """
--实现多进程的3种方式：
-    1. multiprocessing.Process类
-    2. 继承multiprocessing.Process类
-    3. 进程池multiprocessing.Pool类
+-实现多进程：
+    1. multiprocessing.Process类 & 继承multiprocessing.Process类
+    2. 进程池 multiprocessing.Pool类
 
--进程间通信IPC的3种方式:
+-进程间通信IPC：
     1.multiprocessing.Queue类：队列，进程安全。
     2.multiprocessing.Pipe类：管道，进程不安全。
-    3.multiprocessing.Value：共享内存，进程安全。
-      multiprocessing.Array：共享内存，进程安全。
+    3.multiprocessing.Value/Array：共享内存，进程安全。
     4.multiprocessing.Manager：服务进程管理共享状态。
 """
 
@@ -25,7 +23,7 @@ def run(num):
     return os.getpid()
 
 
-"""实现多进程-方式1：multiprocessing.Process类"""
+"""实现多进程：multiprocessing.Process类 & 继承multiprocessing.Process类"""
 from multiprocessing import Process
 
 
@@ -53,34 +51,31 @@ def new_multiprocess():
 
         # 下方介绍几种进程常用方法
         if i == 2:
-            # is_alive()：返回True/False进程是否活着
+            # is_alive()：返回True/False进程是否仍在运行
             print(p.is_alive())
 
 
-"""实现多进程-方式2：继承multiprocessing.Process类"""
-
-
 class MyMultiProcess(Process):
+    """继承multiprocessing.Process类"""
+
     def __init__(self, num):
         super().__init__()
         self.num = num
 
     def run(self):
-        print("进程开始run{}>>> pid={}, ppid={}".format(self.num, os.getpid(), os.getppid()))
-        time.sleep(4)
-        print("进程结束run{}>>> pid={}, ppid={}".format(self.num, os.getpid(), os.getppid()))
-        return os.getpid()
+        run(self.num)
 
 
-"""实现多进程-方式3：进程池multiprocessing.Pool模块"""
+"""实现多进程：进程池 multiprocessing.Pool类"""
 from multiprocessing import Pool
 
 
-def new_multiprocesspool():
+def new_multiprocesspool_byhand():
+    """方式1：手动管理pool资源的启动和释放"""
+
     # Pool(num)：初始化进程池，num指定池内进程数容量。默认为os.cpu_count()。
     pool = Pool(5)
 
-    # 下方介绍启动pool的方式
     # pool.apply(fun, args=(i,))：同步启动一个进程，相当于单进程，别用。
     # pool.apply_async(fun, args=(i,))：启动一个进程。遇到进程池已满的情况，则会等到池中有进程结束，让出空位。
     # 通过列表推导式起10个进程。
@@ -88,27 +83,22 @@ def new_multiprocesspool():
     # apply_async()返回ApplyResult对象，通过get方法获取进程执行结果。
     print([res.get(timeout=1) for res in results])
 
-    # 下方介绍结束pool的方式
-    # 前提说明：pool拥有需要管理的内部资源，需要正确释放。
-    #         1)要么主动调用 close()/terminate() + join()语句释放资源；
-    #         2)要么用with-as语句释放资源。
-
-    # 1) 主动调用 close()/terminate() + join()语句释放资源；
-    # pool.terminate()：立即关闭进程池，立即中断进程任务的执行。
+    # pool.terminate()：进程池停止接收新任务，立即中断进程任务的执行，进程池立即关闭。
     # pool.close()：进程池停止接收新任务，当所有任务执行完毕后，进程池才会关闭。执行任务过程并不会阻塞主进程。
-    # 单独使用close()/terminate()可能导致问题：主进程已经结束，但是子进程还未结束。
-    # 解决方案：与join()方法组合使用，可以避免此问题。
     # pool.join()：阻塞主进程，直至进程池关闭。必须在close或terminate()之后使用。
+    # 推荐套招close()+join()：解决因单独使用close()/terminate()导致主进程已经结束，但是子进程还未结束的问题。
     pool.close()
     pool.join()
 
-    # 2)用with-as语句释放资源：退出语句块时 close()+join() 会被调用。
+
+def new_multiprocesspool_bywith():
+    """方式2：使用with管理pool资源的启动和释放"""
     with Pool(10) as pool:
         results = [pool.apply_async(run, (i,)) for i in range(10)]
         print([res.get() for res in results])
 
 
-"""进程间通信-方式1：multiprocessing.Queue类"""
+"""进程间通信：multiprocessing.Queue类"""
 from multiprocessing import Queue
 
 
@@ -132,13 +122,9 @@ def iPC_by_queue():
 
     p_write.join()
 
-    # 死锁错误场景：请确保队列中的元素都被消费完成后再结束写进程。
-    # 否则，先join写进程，再试图去get元素可能会导致死锁。
-    q.get()
-
     # 下方介绍几种queue常用方法
-    q.empty()
-    q.full()
+    print("empty queue? {}".format(q.empty()))
+    print("full queue? {}".format(q.full()))
 
 
 def write_queue(q, value_list):
@@ -150,7 +136,7 @@ def write_queue(q, value_list):
         q.put(v)
 
 
-"""进程间通信-方式2：multiprocessing.Pipe"""
+"""进程间通信：multiprocessing.Pipe"""
 from multiprocessing import Pipe
 
 
@@ -179,7 +165,7 @@ def write_pipe(conn, value_list):
         conn.send(v)
 
 
-"""进程间通信-方式3：multiprocessing.Value Array"""
+"""进程间通信：multiprocessing.Value/Array"""
 from multiprocessing import Value, Array
 
 
@@ -194,6 +180,7 @@ def iPC_by_value_and_array():
     p.start()
     p.join()
     print(double.value, int.value, char.value, arr_int[:], arr_char[:])
+    print(double., int.value, char.value, arr_int[:], arr_char[:])
 
 
 def run_ipc_by_value_and_array(double, int, char, arr_int, arr_char):
@@ -204,7 +191,7 @@ def run_ipc_by_value_and_array(double, int, char, arr_int, arr_char):
     arr_char[0] = "z"
 
 
-"""进程间通信-方式4：multiprocessing.Manager"""
+"""进程间通信：multiprocessing.Manager"""
 from multiprocessing import Manager
 
 
@@ -235,7 +222,8 @@ def run_ipc_by_manager(dic, li, double, int, char):
 if __name__ == '__main__':
     # 实现多进程
     # new_multiprocess()
-    # new_multiprocesspool()
+    # new_multiprocesspool_byhand()
+    # new_multiprocesspool_bywith()
 
     # 进程间通信IPC
     # iPC_by_queue()
