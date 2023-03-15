@@ -6,9 +6,6 @@
 -线程锁：
     1.Lock类
     2.RLock类
-
--死锁：
-    1.哲学家就餐问题
 """
 import random
 import threading
@@ -120,22 +117,20 @@ from threading import RLock
 
 class Box(object):
     def __init__(self):
-        self._rlock = Lock()
+        self._rlock = RLock()
         self.count = 0
 
     def execute(self, num):
-        self._rlock.acquire()
-        self.count += num
-        self._rlock.release()
+        with self._rlock:
+            self.count += num
 
     def add(self):
         # 在release()之前调用了一个也需要锁的方法，所以需要RLock()
-        self._rlock.acquire()
-        self.execute(1)
-        self._rlock.release()
+        with self._rlock:
+            self.execute(1)
 
     def remove(self):
-        # 调用了一个也需要锁的方法
+        # 在release()之前调用了一个也需要锁的方法，所以需要RLock()
         self._rlock.acquire()
         self.execute(-1)
         self._rlock.release()
@@ -145,7 +140,6 @@ def adder(box, items):
     while items > 0:
         print("add 1 item in the box")
         box.add()
-        time.sleep(1)
         items -= 1
 
 
@@ -153,7 +147,7 @@ def remover(box, items):
     while items > 0:
         print("remove 1 item in the box")
         box.remove()
-        time.sleep(2)
+        time.sleep(3)
         items -= 1
 
 
@@ -172,50 +166,6 @@ def rlock():
     print("after th_remove we have {} in box".format(box.count))
 
 
-"""死锁：
-为
-因程序设计，导致某些情况下没有执行释放锁的语句，导致其他线程无法再使用资源。try——finally/with"""
-
-deadlock_unreleased = Lock()
-deadlock_unreleased_list = [1, 2, 3]
-
-from concurrency.tool_sortlocks import acquire
-
-
-def deadlock_unreleased(index):
-    deadlock_unreleased.acquire()
-    if index >= len(deadlock_unreleased_list) or index < 0:
-        print("wrong index")
-        return False
-    print(deadlock_unreleased_list[index])
-    deadlock_unreleased.release()
-    return True
-
-
-"""死锁-场景2：一个线程中尝试获取多个lock
-经典问题：哲学家就餐问题
-"""
-
-
-def philosopher():
-    people = 5
-    chopsticks_locks = [threading.Lock() for i in range(people)]
-    for i in range(people):
-        Thread(target=eat, args=(chopsticks_locks[i], chopsticks_locks[(i + 1) % people])).start()
-
-
-def eat(left_stick, right_stick):
-    while True:
-        print("{} applying".format(threading.current_thread().name))
-        # with left_stick:
-        #     with right_stick:
-        #         print("{} eating".format(threading.current_thread().name))
-        #         time.sleep(3)
-        with acquire(left_stick, right_stick):
-            print("{} eating".format(threading.current_thread().name))
-            time.sleep(3)
-
-
 if __name__ == "__main__":
     # 主线程
     # print(threading.current_thread().name, threading.current_thread().daemon)
@@ -224,10 +174,8 @@ if __name__ == "__main__":
     # new_threading()
 
     # 线程锁
-    # lock_byfinally()
     # lock_bywith()
+    # lock_byfinally()
     # rlock()
-
-    # 死锁
-    # philosopher()
+    
     pass

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import threading
+import time
 from contextlib import contextmanager
 
 _local = threading.local()
@@ -26,3 +27,35 @@ def acquire(*locks):
         for lock in reversed(locks):
             lock.release()
         del acquired[-len(locks):]
+
+
+def philosopher():
+    people = 5
+    # 一支筷子一把锁
+    chopsticks_locks = [threading.Lock() for i in range(people)]
+    for i in range(people):
+        # 死锁
+        # threading.Thread(target=deadlock_eat, args=(chopsticks_locks[i], chopsticks_locks[(i + 1) % people])).start()
+        # 有序拿锁，不会死锁
+        threading.Thread(target=right_eat, args=(chopsticks_locks[i], chopsticks_locks[(i + 1) % people])).start()
+
+
+def right_eat(left_stick, right_stick):
+    while True:
+        print("{} applying".format(threading.current_thread().name))
+        with acquire(left_stick, right_stick):
+            print("{} eating".format(threading.current_thread().name))
+            time.sleep(3)
+
+
+def deadlock_eat(left_stick, right_stick):
+    while True:
+        print("{} applying".format(threading.current_thread().name))
+        with left_stick:
+            with right_stick:
+                print("{} eating".format(threading.current_thread().name))
+                time.sleep(3)
+
+
+if __name__ == "__main__":
+    philosopher()
