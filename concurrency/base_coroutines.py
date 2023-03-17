@@ -1,76 +1,50 @@
 # -*- coding: utf-8 -*-
-
 """
-利用生成器原始实现：yield+send
+-实现协程
+    1. yield 生成器原始实现
+    2. async+await 语法糖
+"""
 
-# -*- coding:utf8 -*-
+"""实现协程：yield 生成器原始实现"""
+
+
+def new_coroutines_by_yield():
+    con = consumer()
+    con.send(None)
+    for i in range(10):
+        con.send(i)
+    con.close()
+
+
 def consumer():
-    res = ''
-    while True:
-        n = yield res
-        print('[CONSUMER]Consuming %s...' % n)
-        res = "200 OK" if n else "500 EMPTY"
+    print("start consumer")
+    try:
+        while True:
+            data = yield -1
+            print("consuming {} from producer".format(data))
+    except GeneratorExit:
+        print("consumer closed")
 
-def producer(consumer):
-    consumer.send(None)
-    n = 0
-    while n < 10:
-        n = n + 1
-        print('[PRODUCER]Producing %s...' % n)
-        r = consumer.send(n)
-        print('[PRODUCER]Consumer return: %s' % r)
-    r = consumer.send(None)
-    print('[PRODUCER]Consumer return: %s' % r)
-    consumer.close()
 
-if __name__ == '__main__':
-    consumer = consumer()
-    producer(consumer)
-
-语法糖：async def（since Python 3.8）
-
-from datetime import datetime
+"""实现协程：async+await 语法糖"""
 import asyncio
 
-RESOURCE_NUM = 10000
+
+def new_coroutines_by_asyncawait():
+    loop = asyncio.get_event_loop()
+    tasks = [task(i) for i in range(100)]
+    loop.run_until_complete(asyncio.wait(tasks))
 
 
-async def do(param=0):
+# 协程函数：定义形式为 async def 的函数。
+async def task(param):
     print(param)
     await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
-    start = datetime.now()
-    loop = asyncio.get_event_loop()
-    tasks = [do(i) for i in range(RESOURCE_NUM)]
-    loop.run_until_complete(asyncio.wait(tasks))
-    end = datetime.now()
-    print(end - start)
+    # 实现协程
+    # new_coroutines_by_yield()
+    # new_coroutines_by_asyncawait()
 
-gevent
-
-import time
-
-from gevent import monkey;
-
-monkey.patch_socket()
-import gevent
-from datetime import datetime
-
-RESOURCE_NUM = 10000
-
-def do(param=""):
-    print(param)
-    gevent.sleep(1)
-
-if __name__ == "__main__":
-    start = datetime.now()
-    tasks = [gevent.spawn(do, i) for i in range(RESOURCE_NUM)]
-    gevent.joinall(tasks)
-    end = datetime.now()
-    print(end - start)
-"""
-
-if __name__ == "__main__":
     pass
