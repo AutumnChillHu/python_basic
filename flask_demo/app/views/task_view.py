@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 from flask import redirect, url_for, request
 
-from . import task
+from . import task_bp
 from ...utils.request import get_request_params
 
 
-@task.route("/info", methods=["GET"])
-@task.route("/info/<int:task_id>", methods=["GET"])
+@task_bp.route("/info", methods=["GET"])
+@task_bp.route("/info/<int:task_id>", methods=["GET"])
 def task_info(task_id=-1):
     return "here is info of task{}".format(task_id)
 
 
-@task.route("/count", methods=["GET"])
+@task_bp.route("/count", methods=["GET"])
 def task_count():
     print(type(request))
     request_data = get_request_params()
@@ -22,7 +22,7 @@ def task_count():
         return redirect(url_for(".task_info", task_id=9999999999))
     return "100"
 
-# @task.route('/csc/assign/agentId', methods=['POST'])
+# @task_bp.route('/csc/assign/agentId', methods=['POST'])
 # def csc_assign_agentId():
 #     params = get_request_params()
 #     data, msg = CscToolBoxs.csc_assign_agentId(params=params)
