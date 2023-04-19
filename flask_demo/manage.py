@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from flask_demo.app import create_app, create_db
+from flask_demo.app import create_app, create_db_models
 
 app = create_app()
-db = create_db(app)
+db = create_db_models(app)
 
 if __name__ == '__main__':
     # app.run([,debug=True] [,host='0.0.0.0'] [,port='8090'])

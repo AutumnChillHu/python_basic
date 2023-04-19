@@ -2,6 +2,6 @@
 from . import main_bp
 
 
-@main.route("/", methods=["GET"])
+@main_bp.route("/", methods=["GET"])
 def index():
     return "hello world"
