@@ -4,11 +4,16 @@
 """
 
 
-def is_in_dict(d):
-    """判断字典中是否包含key/value/key-value"""
+def if_has_key(key, d):
+    if key in d:
+        return True
 
-    # dict是否包含key
-    # 当key不存在时，d.get()返回None，d["key"]报KeyError。
+
+def if_has_value(d):
+    """判断字典中是否包含value/key-value"""
+
+    # 当key不存在时，d.get()返回None，但是如果d["key"]为空，也不会执行if语句
+    # d["key"]会报KeyError。
     if d.get("key"):
         return True
 
@@ -51,4 +56,4 @@ def delete_dict(d):
 
 
 if __name__ == "__main__":
-    d = {"name": "mo", "age": 25, "gender": "female"}
+    d = {"name": "mo", "age": 25, "gender": None}
