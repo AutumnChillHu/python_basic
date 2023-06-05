@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""leetcode test
-
-https://leetcode.cn/problems/sort-an-array/
+"""
+wiki：https://janineee.atlassian.net/wiki/spaces/JW/pages/9371780
+leetcode testcases：https://leetcode.cn/problems/sort-an-array/
 """
 
 
 def selection_sort(arr):
-    """
+    """选择排序
     时间复杂度：O(n^2) = (n-1)+(n-2)+…+1
     空间复杂度：O(1)
     """
@@ -20,7 +20,7 @@ def selection_sort(arr):
 
 
 def bubble_sort(arr):
-    """
+    """冒泡排序
     时间复杂度：O(n^2) = (n-1)+(n-2)+…+1
     空间复杂度：O(1)
     """
@@ -32,8 +32,7 @@ def bubble_sort(arr):
 
 
 def bubble_sort_v1(arr):
-    """没有逆序对时，就已达到有序，即可返回。
-
+    """冒泡排序优化：没有逆序对时，已达到有序，即可返回。
     时间复杂度：
          最好：O(n)
          最差：O(n^2) = (n-1)+(n-2)+…+1
@@ -51,8 +50,7 @@ def bubble_sort_v1(arr):
 
 
 def bubble_sort_v2(arr):
-    """没有逆序对的局部，即有序，记录位置不再遍历。
-
+    """冒泡排序优化：没有逆序对的局部是部分有序的，记录位置不再遍历有序部分。
     时间复杂度：
          最好：O(n)
          最差：O(n^2) = (n-1)+(n-2)+…+1
@@ -63,33 +61,33 @@ def bubble_sort_v2(arr):
         swapped = False
         for j in range(last_swap):
             if arr[j] > arr[j + 1]:
-                swapped = True
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
                 last_swap = j
-        if -1 == swapped:
+        if not swapped:
             return arr
     return arr
 
 
 def insertion_sort(arr):
-    """
+    """插入排序
     时间复杂度：
          最好：O(n)
-         最差：O(n^2) = (n-1)+(n-2)+…+1
+         最差：O(n^2) = 1+2+...+(n-1)
     空间复杂度：O(1)
     """
     for i in range(1, len(arr)):
-        ele = arr[i]
+        item = arr[i]
         j = i - 1
-        while (j >= 0 and arr[j] > ele):
+        while (j >= 0 and item < arr[j]):
             arr[j + 1] = arr[j]
             j -= 1
-        arr[j + 1] = ele
+        arr[j + 1] = item
     return arr
 
 
 def insertion_sort_v1(arr):
-    """
+    """插入排序优化：因为数组已经局部有序了，可以用二分查找来确定插入位置，减少比较次数。
     时间复杂度：
          最好：
          最差：
@@ -136,8 +134,9 @@ if __name__ == "__main__":
         [12, 34, 100, -10, 345, 49, 68, 0, 2435, 3546, 9, 45, 987, 12, 56, 8, 12, 67, 9, 3, 5],
         [17, 56, 71, 38, 61, 62, 48, 28, 57, 42]
     ]
-    l = [1, 2, 3]
-    for arr in arr_list:
-        # print(bubble_sort(arr[:]))
-        print(selection_sort(arr[:]))
-        # print(insertion_sort1(arr[:]))
+    # for arr in arr_list:
+    # print(bubble_sort(arr[:]))
+    # print(selection_sort(arr[:]))
+    # print(insertion_sort1(arr[:]))
+    li = [5, 2, 3, 1]
+    print(insertion_sort(li))
