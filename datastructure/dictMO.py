@@ -57,3 +57,5 @@ def delete_dict(d):
 
 if __name__ == "__main__":
     d = {"name": "mo", "age": 25, "gender": None}
+    d2 = {"age": 25, "name": "mo", "gender": None}
+    print(d==d2)
