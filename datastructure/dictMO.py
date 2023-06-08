@@ -55,7 +55,19 @@ def delete_dict(d):
     print(d.popitem())
 
 
+def sort_by_sorted(d={"z": 1, "a": 100, "t": 50}):
+    # 1.对key排序
+    print(sorted(d), sorted(d.keys()))
+    # 2.对value排序
+    print(sorted(d.values()))
+    # 3.以d.items()[(key, val), (key, val)]中的第二项value来排序
+    print(sorted(d.items(), key=lambda x: x[1], reverse=True))
+    # 不影响原对象
+    print(d)
+
+
 if __name__ == "__main__":
     d = {"name": "mo", "age": 25, "gender": None}
-    d2 = {"age": 25, "name": "mo", "gender": None}
-    print(d==d2)
+    d2 = {"age": 25, "name": "mo", "g¬ender": None}
+    # print(d == d2)
+    sort_by_sorted()
