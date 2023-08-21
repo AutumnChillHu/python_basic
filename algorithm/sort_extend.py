@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+"""leetcode testcases 选取第K大/前K个元素:https://leetcode.cn/problems/xx4gT2/"""
+
 import random
 
 
 def find_Kth_by_quicksort(arr, start, end, k):
+    """寻找第K大的数/前K大的数：基于快排"""
     if start >= end:
         return arr
 
@@ -28,7 +31,26 @@ def find_Kth_by_quicksort(arr, start, end, k):
 
 
 def find_Kth_by_mergesort(arr, start, end, k):
-    pass
+    """寻找第K大的数/前K大的数：基于归并排序"""
+    if end <= start:
+        return arr[k - 1]
+
+    mid = (start + end) // 2 + 1
+    find_Kth_by_mergesort(arr, start, mid - 1, k)
+    find_Kth_by_mergesort(arr, mid, end, k)
+
+    i, j = start, mid
+    sorted_arr = []  # 倒序排列元素
+    while (i < mid or j <= end) and len(sorted_arr) < k:  # 只排前K个元素即可
+        if j > end or (i < mid and arr[i] >= arr[j]):
+            sorted_arr.append(arr[i])
+            i += 1
+        else:
+            sorted_arr.append(arr[j])
+            j += 1
+    end_index = start + k if len(sorted_arr) == k else end + 1
+    arr[start: end_index] = sorted_arr
+    return arr[k - 1]
 
 
 def find_Kth_by_orderedarr(arr, k):
@@ -49,4 +71,4 @@ def find_Kth_by_orderedarr(arr, k):
 if __name__ == "__main__":
     arr = [3, 2, 1, 5, 6, 4]
 
-    print(find_Kth_by_orderedarr(arr, 2))
+    print(find_Kth_by_mergesort(arr, 0, len(arr) - 1, 2))

@@ -143,7 +143,8 @@ def merge_sort(arr, start, end):
     i, j = start, mid
     while i < mid or j <= end:
         # or的两个条件的先后顺序不能改变，否则有可能出现j超出范围的错误。
-        if i < mid and (j > end or arr[i] <= arr[j]):
+        # j超标且i还剩余的情况 or ij都在范围内且i更小
+        if j > end or (i < mid and arr[i] <= arr[j]):
             sorted_arr.append(arr[i])
             i += 1
         else:
@@ -170,5 +171,6 @@ if __name__ == "__main__":
     #     # print(merge_sort(arr, 0, len(arr) - 1))
     #     print(quick_sort(arr, 0, len(arr) - 1))
 
-    li = [3,2,1,5,6,4]
+    li = [3, 2, 1, 5, 6, 4]
     print(merge_sort(li, 0, len(li) - 1))
+    print(li)
