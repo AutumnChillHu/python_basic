@@ -8,7 +8,7 @@
 import sys
 
 
-class Student(object):
+class Student():
     """
     A Student is an object used to provide students'information.
 
@@ -25,7 +25,6 @@ class Student(object):
 
     def __init__(self, *args, **kwargs):
         pass
-
 
     def update(self, *args, **kwargs):
         """ updates student info. """

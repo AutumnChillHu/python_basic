@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    1.写不写return? —— no_return()、all_return()
+    1.写不写return?  no_return() 或者 all_return()
     2.函数内部涉及对参数的原地修改，return OR return var? —— update_return()
 """
 
@@ -24,15 +24,10 @@ def all_return(value):
 
 def update_return(arr):
     """
-    调用函数时可能：
-    1.update_return(arr):     arr会被影响，此时return None 和 return arr效果一样。
-    2.update_return(arr[:]):  arr不会被影响，如果只是return None，那么经过原地修改的arr就无法得到了。
-
-    所以如果对入参有原地/不原地修改的，建议都要返回具体值。
+    调用函数时，传参可能：直接引用(旧瓶装旧酒)/分片(新瓶装旧酒)/深复制(新瓶装新酒)
+    通过调用函数时的穿参方式来控制。
     """
-    if len(arr) > 1:
-        arr[0], arr[1] = arr[1], arr[0]
-    return arr
+    pass
 
 
 if __name__ == "__main__":

@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-准则：优秀实用主义。实用且推荐写法。
-"""
-
 
 def if_has_key(key, d):
     if key in d:
@@ -12,13 +8,8 @@ def if_has_key(key, d):
 def if_has_value(d):
     """判断字典中是否包含value/key-value"""
 
-    # 当key不存在时，d.get()返回None，但是如果d["key"]为空，也不会执行if语句
-    # d["key"]会报KeyError。
+    # key不存在时，d["key"]会报KeyError，d.get("key")返回None。
     if d.get("key"):
-        return True
-
-    # dict是否包含value
-    if "value" in d.values():
         return True
 
     # dict是否包含key-value
@@ -55,13 +46,11 @@ def delete_dict(d):
     print(d.popitem())
 
 
-def sort_by_sorted(d={"z": 1, "a": 100, "t": 50}):
-    # 1.对key排序
+def sort_dict(d={"z": 1, "a": 100, "t": 50}):
+    # 1.对key排序，默认情况。
     print(sorted(d), sorted(d.keys()))
     # 2.对value排序
     print(sorted(d.values()))
-    # 3.以d.items()[(key, val), (key, val)]中的第二项value来排序
-    print(sorted(d.items(), key=lambda x: x[1], reverse=True))
     # 不影响原对象
     print(d)
 
@@ -70,4 +59,4 @@ if __name__ == "__main__":
     d = {"name": "mo", "age": 25, "gender": None}
     d2 = {"age": 25, "name": "mo", "g¬ender": None}
     # print(d == d2)
-    sort_by_sorted()
+    sort_dict()

@@ -21,7 +21,7 @@ def new_linkedlist(vals):
     return head
 
 
-def tolist_linkedlist(head):
+def linkedlist_tolist(head):
     """链表转换为list"""
 
     li = []
@@ -36,4 +36,4 @@ def tolist_linkedlist(head):
 if __name__ == "__main__":
     nodes = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
     head = new_linkedlist(nodes)
-    print(tolist_linkedlist(head))
+    print(linkedlist_tolist(head))

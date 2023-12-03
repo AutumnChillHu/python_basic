@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 -实现多线程：
-    1.threading.Thread类 & 继承threading.Thread类
+    1. 使用 threading.Thread类 创建线程。
+    2. 使用 继承threading.Thread类 的自定义类 创建线程。
 
 -线程锁：
-    1.Lock类
-    2.RLock类
+    1. threading.Lock类
+    2. threading.RLock类
 """
 import random
 import threading
@@ -18,17 +19,18 @@ def run(seconds):
     print("线程结束run>>>thread_name={} args={}".format(threading.current_thread().name, seconds))
 
 
-"""实现多线程：threading.Thread类 & 继承threading.Thread类"""
+"""实现多线程-1. 使用 threading.Thread类 创建线程。"""
 from threading import Thread
 
 
 def new_threading():
     threading_list = []
-    datas = [random.randint(0, 10) for i in range(5)]
+    datas = [random.randint(0, 10) for _ in range(5)]  # random.randint(a, b) 返回[a, b]区间内的一个随机整数
+
     # Thread(target=run, args=(i,) [,daemon=False])：初始化线程。
-    #   -target：绑定启动线程时需要执行的方法。
+    #   -target：绑定启动线程时需要执行的run()方法。
     #   -args：以元组形式传递run()需要的的参数。
-    #   -daemon：主动指定是否为守护线程True/False。默认为None，意味着new_thread.daemon=current_thread().daemon。
+    #   -daemon：指定是否为守护线程True/False。默认为None，意味着new_thread.daemon=current_thread().daemon。
     for data in datas:
         th = Thread(target=run, args=(data,))
         threading_list.append(th)
@@ -42,24 +44,29 @@ def new_threading():
     # is_alive()：判断线程是否在运行
     #   -返回True：当run()方法刚开始直到run()方法刚结束。
     #   -返回False：run()方法结束后，无论run()正常/异常结束都算。
-    # 调用join()之后，再调用is_alive()，可以捕获join()后线程仍然存活的情况。
+    # 调用join()之后，再调用is_alive()，可以捕获join()后线程仍然存活的情况，如join()等待超时。
     if threading_list[-1].is_alive():
         raise RuntimeError("thread could not stop running")
     print("在threading_list[-1]结束的条件下，做一些运算。")
 
 
+"""实现多线程-2. 使用 继承threading.Thread类 的自定义类 创建线程。"""
+
+
 class MyThread(Thread):
-    """只能重载Threading类的__init__()和run()"""
+    """重载Threading类的__init__()和run()"""
 
     def __init__(self, num):
         super().__init__()
         self.num = num
 
     def run(self):
-        run(self.num)
+        print("线程开始run>>>thread_name={} args={}".format(threading.current_thread().name, self.num))
+        time.sleep(self.num)
+        print("线程结束run>>>thread_name={} args={}".format(threading.current_thread().name, self.num))
 
 
-"""线程锁：Lock"""
+"""线程锁-1. threading.Lock类"""
 from threading import Lock
 
 
@@ -85,11 +92,9 @@ def lock_byfinally():
     """使用finally语句释放锁"""
     li = []
     lock = Lock()
-
     for i in range(5):
         Thread(target=run_lock_finally, args=(li, lock)).start()
-
-    while lock.locked():
+    while lock.locked():  # 获取锁的状态
         print("waiting for thread end")
         time.sleep(1)
     print("li: {}".format(li))
@@ -106,64 +111,45 @@ def run_lock_finally(li, lock):
         li[-1] += "mo"
         print("thread:{}, li:{}".format(threading.current_thread().name, li))
     finally:
-        # release()：可以在任何线程释放，意味着acquire&release不需要出现在统一线程中。
+        # release()：可以在任何线程释放，意味着acquire&release不需要出现在同一线程中。
         #           非锁定状态时，调用此方法会引发RuntimeError，保险起见可用if lock.locked()。
         lock.release()
 
 
-"""线程锁：RLock"""
+"""线程锁-2. threading.RLock类"""
 from threading import RLock
 
-
-class Box(object):
-    def __init__(self):
-        self._rlock = RLock()
-        self.count = 0
-
-    def execute(self, num):
-        with self._rlock:
-            self.count += num
-
-    def add(self):
-        # 在release()之前调用了一个也需要锁的方法，所以需要RLock()
-        with self._rlock:
-            self.execute(1)
-
-    def remove(self):
-        # 在release()之前调用了一个也需要锁的方法，所以需要RLock()
-        self._rlock.acquire()
-        self.execute(-1)
-        self._rlock.release()
-
-
-def adder(box, items):
-    while items > 0:
-        print("add 1 item in the box")
-        box.add()
-        items -= 1
-
-
-def remover(box, items):
-    while items > 0:
-        print("remove 1 item in the box")
-        box.remove()
-        time.sleep(3)
-        items -= 1
-
+def adder(rlock, goods_list, add_list):
+    """with语句"""
+    for i in add_list:
+        with rlock:
+            goods_list.append(i)
+            print("add 1 item {}".format(goods_list))
+            time.sleep(0.5)
+def remover(rlock, goods_list, remove_cnt):
+    """finally语句"""
+    while remove_cnt > 0:
+        try:
+            rlock.acquire()
+            item = goods_list.pop()
+            print("remove 1 item {}, {}".format(item, goods_list))
+            remove_cnt -= 1
+        except IndexError:
+            print("not enough goos to remove {}".format(goods_list))
+            break  # 如果这里用return语句将不会执行finally语句。
+        finally:
+            rlock.release()
+        time.sleep(1)
 
 def rlock():
-    box = Box()
-    items = 5
-    th_add = Thread(target=adder, args=(box, items))
-    th_remove = Thread(target=remover, args=(box, items))
+    goods_list = []
+    rlock = RLock()
+    th_add = Thread(target=adder, args=(rlock, goods_list, [1, 2, 3, 4, 5, 6, 7]))
+    th_remove = Thread(target=remover, args=(rlock, goods_list, 8))
     th_add.start()
     th_remove.start()
-
-    print("now we have {} in box".format(box.count))
     th_add.join()
-    print("after th_add.join() we have {} in box".format(box.count))
     th_remove.join()
-    print("after th_remove we have {} in box".format(box.count))
 
 
 if __name__ == "__main__":
@@ -177,5 +163,7 @@ if __name__ == "__main__":
     # lock_bywith()
     # lock_byfinally()
     # rlock()
-    
+
+    rlock()
+
     pass

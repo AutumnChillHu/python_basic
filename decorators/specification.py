@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
-用实际例子说明decrator的一些特性
-https://janineee.atlassian.net/wiki/spaces/JW/pages/327738/py03#%E8%A3%85%E9%A5%B0%E5%99%A8decorator
-'''
+'''装饰器特性说明'''
 
 from functools import wraps
 

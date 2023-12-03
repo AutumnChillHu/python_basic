@@ -5,16 +5,14 @@
     2. async+await 语法糖
 """
 
-"""实现协程：yield 生成器原始实现"""
-
-
-def new_coroutines_by_yield():
+"""实现协程-1. yield 生成器原始实现"""
+def new_coroutine_by_yield():
     con = consumer()
     con.send(None)
+    # 生产者
     for i in range(10):
         con.send(i)
     con.close()
-
 
 def consumer():
     print("start consumer")
@@ -26,11 +24,10 @@ def consumer():
         print("consumer closed")
 
 
-"""实现协程：async+await 语法糖"""
+"""实现协程-2. async+await 语法糖"""
 import asyncio
 
-
-def new_coroutines_by_asyncawait():
+def new_coroutine_by_asyncawait():
     loop = asyncio.get_event_loop()
     tasks = [task(i) for i in range(100)]
     loop.run_until_complete(asyncio.wait(tasks))
